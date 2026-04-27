@@ -20,19 +20,17 @@ argument-hint: 'Function name to inspect (e.g., "LinearModelFit", "Classify", "E
 
 ### 1. Verify Wolfram Code Execution Environment
 
-To use this skill, you need to be able to evaluate Wolfram Language code. Options include:
-- **Wolfram MCP Server**: Direct code evaluation (preferred)
-- **wolframscript**: Command line interface  
-- **Wolfram Desktop/Mathematica**: Full environment
-
-If you have no way to evaluate Wolfram code, inform the user that this skill requires Wolfram code execution.
+To use this skill, you need to be able to evaluate Wolfram Language code. If you have no way to evaluate Wolfram code, inform the user that this skill requires Wolfram code execution and ask them how you can assist them with that.
 
 ### 2. Load the DefinitionString Utility
 Load the specialized function for examining symbol definitions:
 
 ```wolfram
+SetDirectory["path/to/skill/directory"]; (* Adjust to your skill directory *)
 Get["utils/DefinitionString.wl"]
 ```
+
+The expected output is `Null`.
 
 **If loading fails**, ensure:
 - The skill directory is in your current path or use the full path
