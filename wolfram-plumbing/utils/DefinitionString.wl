@@ -7,6 +7,8 @@ BeginPackage["WolframPlumbing`"];
 
 DefinitionString::usage = "DefinitionString[sym] returns the definition of symbol sym with context aliases for readability. Removes ReadProtected attribute and shows internal implementation details.";
 
+Begin["`Private`"]
+
 (* Main function for extracting and formatting symbol definitions *)
 SetAttributes[DefinitionString, HoldFirst];
 DefinitionString[sym_Symbol]
@@ -45,5 +47,7 @@ DefinitionString[sym_Symbol] := Block[
 		]
 	]
 ];
+
+End[]
 
 EndPackage[];
