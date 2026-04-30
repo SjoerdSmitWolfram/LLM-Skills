@@ -248,121 +248,51 @@ OnlineDocsQuery[url_, elements_List] := AssociationMap[
 
 (* ================ yamlToWL Start ================ *)
 
-yamlToWL[s_String] := Enclose @ Module[{
-	lines, cleanLines, parsed
+yamlToWL[yaml_String] := Enclose @ Module[{
+	inds, lines, cleanLines, parsed, data
 },
-	(* Remove YAML delimiters and split into lines *)
-	lines = StringSplit[
-		StringDelete[s, StartOfString ~~ "---" ~~ ("\n" | EndOfString) | "\n---" ~~ EndOfString], 
-		"\n"
-	];
-	
-	(* Remove empty lines and comments *)
-	cleanLines = DeleteCases[lines, "" | Whitespace | _?(StringStartsQ[#, "#"]&)];
-	
-	(* Parse the YAML structure *)
-	parsed = parseYAMLLines[cleanLines];
-	
-	ConfirmBy[parsed, AssociationQ, "YAML parsing failed"]
+	inds = StringPosition[yaml, StartOfLine ~~ LetterCharacter ~~ Shortest[__] ~~ ":"];
+	If[ inds === {}
+		,
+		<||>
+		,
+		ConfirmAssert[MatrixQ[inds, IntegerQ]];
+		inds = Append[inds[[All, 1]], 0];
+		lines = ConfirmMatch[
+			StringTake[
+				yaml,
+				Transpose @ {Most[inds], Rest[inds] - 1}
+			],
+			{__String}
+		];
+		data = ConfirmBy[Association[parseYAMLLine /@ lines], AssociationQ]
+	]
 ];
 
 (* Helper function to parse YAML lines into Wolfram associations *)
-parseYAMLLines[lines_List] := Module[{
-	result = <||>, currentKey = None, currentValue = {}, inList = False, listIndent = 0
-},
-	Do[
-		With[{line = lines[[i]]},
-			Which[
-				(* Key-value pair at root level *)
-				StringMatchQ[line, RegularExpression["^[a-zA-Z_][a-zA-Z0-9_]*:\\s*(.*)$"]] && !StringStartsQ[line, " "],
-				Module[{key, value},
-					{key, value} = parseKeyValue[line];
-					If[inList, 
-						(* Finish previous list *)
-						result[currentKey] = currentValue;
-						inList = False;
-						currentValue = {};
-					];
-					If[StringQ[value] && value != "",
-						result[key] = value,
-						(* Prepare for potential list *)
-						currentKey = key;
-						inList = True;
-						currentValue = {};
-					]
-				],
-				
-				(* List item *)
-				StringMatchQ[line, RegularExpression["^\\s*-\\s*(.*)$"]],
-				Module[{indent, content},
-					indent = StringLength[StringCases[line, StartOfString ~~ Whitespace, 1][[1]]];
-					content = StringTrim[StringDelete[line, StartOfString ~~ Whitespace ~~ "-" ~~ Whitespace]];
-					
-					If[!inList,
-						(* Start new list *)
-						inList = True;
-						listIndent = indent;
-						currentValue = {};
-					];
-					
-					If[indent == listIndent,
-						(* Simple list item *)
-						If[content != "",
-							AppendTo[currentValue, content],
-							(* Object list item starting *)
-							AppendTo[currentValue, <||>]
-						],
-						(* Nested content - handle as key-value in last object *)
-						If[Length[currentValue] > 0 && AssociationQ[Last[currentValue]],
-							Module[{key, value},
-								{key, value} = parseKeyValue[StringTrim[content]];
-								currentValue[[-1]][key] = value;
-							]
-						]
-					]
-				],
-				
-				(* Nested key-value pairs (for objects in lists) *)
-				StringStartsQ[line, " "] && StringContainsQ[line, ":"] && inList,
-				Module[{key, value, trimmed},
-					trimmed = StringTrim[line];
-					{key, value} = parseKeyValue[trimmed];
-					If[Length[currentValue] > 0 && AssociationQ[Last[currentValue]],
-						currentValue[[-1]][key] = value,
-						(* Start new object *)
-						AppendTo[currentValue, <|key -> value|>]
-					]
-				]
-			]
-		],
-		{i, Length[lines]}
-	];
-	
-	(* Add final list if we were building one *)
-	If[inList, result[currentKey] = currentValue];
-	
-	result
+parseYAMLLine[s_] := Module[{key, val},
+	key = StringTrim @ First @ StringCases[s, StartOfString ~~ Shortest[__] ~~ ":", 1];
+	val = StringTrim @ StringDelete[s, StartOfString ~~ key];
+	key = StringTrim[key, ":"];
+	key -> parseYAMLValue[val]
 ];
 
-(* Helper to parse individual key-value pairs *)
-parseKeyValue[line_String] := Module[{
-	parts, key, value
+parseYAMLValue[s_] /; !StringStartsQ[s, "-"] := StringTrim[s, ("\"" | WhitespaceCharacter)..];
+parseYAMLValue[s_] := With[{
+	lines = StringSplit[s, "\n"]
 },
-	parts = StringSplit[line, ":", 2];
-	key = StringTrim[First[parts]];
-	value = If[Length[parts] > 1, 
-		StringTrim[Last[parts]], 
-		""
-	];
-	
-	(* Clean up quoted strings *)
-	value = StringReplace[value, {
-		StartOfString ~~ "\"" ~~ content___ ~~ "\"" ~~ EndOfString :> content,
-		StartOfString ~~ "'" ~~ content___ ~~ "'" ~~ EndOfString :> content
-	}];
-	
-	{key, value}
+	StringTrim[lines, ("-" | WhitespaceCharacter)..]/; AllTrue[lines, StringStartsQ["-"]]
 ];
+parseYAMLValue[s_] := With[{
+	blocks = StringReplace[
+		StringSplit[s, WhitespaceCharacter ... ~~ "-" ~~ WhitespaceCharacter ...],
+		"\n" ~~ WhitespaceCharacter .. -> "\n"
+	]
+},
+	yamlToWL /@ blocks
+]
+
+
 
 (* ================ yamlToWL End ================ *)
 
