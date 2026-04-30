@@ -381,7 +381,7 @@ parseYAMLValue[s_] := With[{
 		"\n" ~~ WhitespaceCharacter .. -> "\n"
 	]
 },
-	yamlToWL /@ blocks
+	YAMLToAssociation /@ blocks
 ];
 
 (* ================ YAMLToAssociation End ================ *)
