@@ -127,8 +127,8 @@ Generate formatted summaries of data structures for analysis and reporting.
 (* 1. Search for functions by topic *)
 searchResults = DocuSearch["machine learning classification"];
 
-(* 2. Extract URIs for detailed analysis *)
-uris = Lookup[searchResults["Matches"], "URI"];
+(* 2. Extract URLs for detailed analysis *)
+urls = Lookup[searchResults["Matches"], "URL"];
 
 (* 3. Cache relevant documentation for offline use *)
 urls = Lookup[searchResults["Matches"], "URL"];
@@ -185,7 +185,7 @@ StringCases[
 ### Function Recommendation System
 Use search results to recommend appropriate Wolfram functions based on user descriptions.
 
-### Example Generation  
+### Example Generation
 Extract usage examples and code patterns from documentation for educational content.
 
 ### Documentation Quality Analysis
@@ -199,15 +199,16 @@ Build comprehensive reference materials by aggregating information from multiple
 1. **Incremental caching**: Cache documentation progressively to build a local reference
 2. **Metadata standardization**: Use consistent metadata fields across searches  
 3. **Error handling**: Check return values for `Missing["NotFound"]` and `$Failed`
-4. **Batch operations**: Process multiple URIs together for efficiency
-5. **Size monitoring**: Use `DataSizeSummary` to manage memory usage with large datasets
-6. **Element specification**: Use the `"Elements"` specification in `OnlineDocsQuery` to focus on relevant content for analysis and avoid unnecessary data processing. If necessary, add custom code (`KeyTake`, `Part`, `StringCases` etc.) to filter or transform extracted data for specific use cases.
+4. **Batch operations**: Process multiple URLs together for efficiency
+5. **Element specification**: Use the `"Elements"` specification in `OnlineDocsQuery[url, part, "Elements"]` to focus on relevant content for analysis and avoid unnecessary data processing. Add custom code (`KeyTake`, `Part`, `StringCases` etc.) to filter or transform extracted data for specific use cases.
+6. **Size monitoring**: Use `DataSizeSummary` to manage memory usage with large datasets
+
 
 ## Troubleshooting
 
 **Search returns no results**: Verify search terms, try broader queries, check for typos  
 **Caching fails**: Ensure internet connectivity, validate URLs, check disk space  
-**URI resolution errors**: Use exact URI format from search results, verify function exists  
+**URL resolution errors**: Use exact URL format from search results, verify function exists  
 **Memory issues with large datasets**: Process in smaller batches, use selective extraction  
 
 ## Output Formats
