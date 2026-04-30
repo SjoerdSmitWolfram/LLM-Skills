@@ -179,7 +179,7 @@ sectionHeaders = OnlineDocsQuery[url, "Sections", "Elements"]
 (* Out[] = {"# Plot", "## Details and Options", ..., "### Neat Examples (1)", "## See Also", ...}*)
 
 (* Extract a specific section *)
-OnlineDocsQuery[url, "Sections", Key["## Neat Examples (1)"]]
+OnlineDocsQuery[url, "Sections", Key["### Neat Examples (1)"]]
 
 (* 3. Check data size of a YAML element *)
 
