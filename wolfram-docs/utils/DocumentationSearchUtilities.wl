@@ -26,18 +26,6 @@ and Limit (default: 5) are used for pagination of results. \n\n" <> StringTempla
 	{"Title", "Type", "ShortenedSummary", "URI", "URL", "Description", "Context"}
 ];
 
-DocPageSkeleton::usage = "DocPageSkeleton[uri] returns an association with summary data in a doc page referred to by a given URI string (such as \"ref/Plot\").
-DocPageSkeleton[{uri_1, uri_2, ...}] returns an association where the keys are the URIs and the values are the summary results. URIs that were not \
-found will be dropped. \n\n" <> StringTemplate[
-	"The returned summary data has the following possible keys (and potentially others), depending on the type of URI:\n`1`"][
-	{
-		"Abstract", "Caption", "Context", "Description", "Dictionary",  "DisplayedCategory", "ExactTitle", "ExampleText", "Frequency", 
-		"FunctionsSubsection", "Keywords", "Language", "LinkedSymbols", "Location", "MathCaption", "NormalizedTitle", "NotebookPackage", 
-		"NotebookStatus", "NotebookType", "PacletName", "ReferredBy", "SeeAlso", "ShortNotations", "SnippetPlaintext", "Synonyms", 
-		"TableText", "Text", "Title", "TokenizedNotebookType", "URL", "Usage"
-	}
-];
-
 
 FetchAndCacheOnlineDocPage::usage = "FetchAndCacheOnlineDocPage[url] fetches the markdown version of a documentation page at a given URL. \
 It if successful, it will locally cache the page and return the file name of the cache.
@@ -112,6 +100,18 @@ DocuSearch[q_String, opts : OptionsPattern[]] := Enclose @ Module[{
 
 
 (* ================ DocPageSkeleton Start ================ *)
+
+DocPageSkeleton::usage = "DocPageSkeleton[uri] returns an association with summary data in a doc page referred to by a given URI string (such as \"ref/Plot\").
+DocPageSkeleton[{uri_1, uri_2, ...}] returns an association where the keys are the URIs and the values are the summary results. URIs that were not \
+found will be dropped. \n\n" <> StringTemplate[
+	"The returned summary data has the following possible keys (and potentially others), depending on the type of URI:\n`1`"][
+	{
+		"Abstract", "Caption", "Context", "Description", "Dictionary",  "DisplayedCategory", "ExactTitle", "ExampleText", "Frequency", 
+		"FunctionsSubsection", "Keywords", "Language", "LinkedSymbols", "Location", "MathCaption", "NormalizedTitle", "NotebookPackage", 
+		"NotebookStatus", "NotebookType", "PacletName", "ReferredBy", "SeeAlso", "ShortNotations", "SnippetPlaintext", "Synonyms", 
+		"TableText", "Text", "Title", "TokenizedNotebookType", "URL", "Usage"
+	}
+];
 
 DocPageSkeleton[uri_] := Enclose @ Module[{
 	input = uri,

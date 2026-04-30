@@ -52,26 +52,7 @@ customResults = DocuSearch["integration",
   "MetaData" -> {"Title", "URI", "Usage", "SeeAlso"}];
 ```
 
-### 2. Extract Page Summaries (`DocPageSkeleton`)
-
-Get structured summary data from documentation pages using URIs.
-
-**Key capabilities:**
-- Extract abstracts, usage information, and examples
-- Batch processing of multiple pages
-- Structured metadata including keywords, synonyms, and cross-references
-- Handles different document types (functions, guides, tutorials)
-
-**Usage patterns:**
-```wolfram
-(* Single page summary *)
-plotInfo = DocPageSkeleton["ref/Plot"];
-
-(* Batch extraction *)
-functionInfo = DocPageSkeleton[{"ref/Plot", "ref/ListPlot", "ref/BarChart"}];
-```
-
-### 3. Cache Online Documentation (`FetchAndCacheOnlineDocPage`)
+### 2. Cache Online Documentation (`FetchAndCacheOnlineDocPage`)
 
 Download and locally cache online documentation pages for offline analysis.
 
@@ -92,7 +73,7 @@ cacheFile = FetchAndCacheOnlineDocPage[
 FetchAndCacheOnlineDocPage[url, True];
 ```
 
-### 4. Extract Documentation Elements (`OnlineDocsQuery`)
+### 3. Extract Documentation Elements (`OnlineDocsQuery`)
 
 Parse specific elements from cached or online documentation pages.
 
@@ -118,7 +99,7 @@ OnlineDocsQuery[url, "FullText", "SizeSummary"]
 OnlineDocsQuery[url, "StructuredYAML", Key["title"]]
 ```
 
-### 5. Data Structure Analysis (`DataSizeSummary`)
+### 4. Data Structure Analysis (`DataSizeSummary`)
 
 Generate formatted summaries of data structures for analysis and reporting.
 
@@ -134,7 +115,6 @@ Generate formatted summaries of data structures for analysis and reporting.
 
 ```wolfram
 ?DocuSearch
-?DocPageSkeleton
 ?FetchAndCacheOnlineDocPage
 ?OnlineDocsQuery
 ?DataSizeSummary
@@ -150,13 +130,7 @@ searchResults = DocuSearch["machine learning classification"];
 (* 2. Extract URIs for detailed analysis *)
 uris = Lookup[searchResults["Matches"], "URI"];
 
-(* 3. Get comprehensive information *)
-detailedInfo = DocPageSkeleton[uris];
-
-(* 4. Analyze content structure *)
-Map[DataSizeSummary, detailedInfo]
-
-(* 5. Cache relevant documentation for offline use *)
+(* 3. Cache relevant documentation for offline use *)
 urls = Lookup[searchResults["Matches"], "URL"];
 cacheFiles = FetchAndCacheOnlineDocPage /@ urls;
 ```
