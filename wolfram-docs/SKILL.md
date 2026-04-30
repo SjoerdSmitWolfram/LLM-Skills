@@ -130,6 +130,17 @@ Generate formatted summaries of data structures for analysis and reporting.
 
 ## Workflow Examples
 
+### Utilitiy function usage information
+
+```wolfram
+?DocuSearch
+?DocPageSkeleton
+?FetchAndCacheOnlineDocPage
+?OnlineDocsQuery
+?DataSizeSummary
+```
+
+
 ### Documentation Discovery Workflow
 
 ```wolfram
@@ -180,14 +191,18 @@ DataSizeSummary @ OnlineDocsQuery[url, "StructuredYAML", Key["related_guides"]]
 
 OnlineDocsQuery[url, "StructuredYAML", Key["related_guides"]]
 
-(* 4. Extract specific metadata patterns *)
-
 (* 4. Find specific elements in meta data and extract them *)
 OnlineDocsQuery[url, "StructuredYAML", "Elements"]
 
 (*Out[]= {"title", "language", "type", "summary", "keywords", "canonical_url", "source", "related_guides", "related_functions"} *)
 
 DataSizeSummary @ OnlineDocsQuery[url, "StructuredYAML", Key["related_guides"]]
+
+(* 5. Extract data from full text using regular expressions *)
+StringCases[
+  OnlineDocsQuery[url, "FullText"],
+  RegularExpression["regular expression pattern to match specific content"]
+]
 
 ```
 
