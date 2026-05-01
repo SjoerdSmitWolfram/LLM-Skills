@@ -32,6 +32,7 @@ Read the up-to-date usage information for the core functions:
 DocuSearch::usage
 OnlineDocsQuery::usage
 DataSizeSummary::usage
+CodeSnippets::usage
 ```
 
 All functions provide detailed usage information on-demand via `?FunctionName` or `FunctionName::usage`. The usage messages contain comprehensive parameter descriptions, return value structures, and example patterns.
@@ -160,7 +161,10 @@ sectionHeaders = OnlineDocsQuery[url, "Sections", "Elements"]
 (* Out[] = {"# Plot", "## Details and Options", ..., "### Neat Examples (1)", "## See Also", ...}*)
 
 (* Extract a specific section *)
-OnlineDocsQuery[url, "Sections", Key["### Neat Examples (1)"]]
+neatExamples = OnlineDocsQuery[url, "Sections", Key["### Neat Examples (1)"]]
+
+(* Extract code snippets from the neat examples section *)
+CodeSnippets[neatExamples]
 
 (* 3. Check data size of a YAML element *)
 

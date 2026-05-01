@@ -58,6 +58,9 @@ For other expressions, returns argument count and head type."
 
 YAMLToAssociation::usage = "YAMLToAssociation[string] converts a YAML string to an association."
 
+CodeSnippets::usage = "CodeSnippets[data] extracts code examples from markdown text. Automatically maps over lists and associations.
+CodeSnippets[data, spec] only extracts specific types of code (wl, python, java, etc.)"
+
 Begin["`Private`"]
 
 Needs["DocumentationSearch`" -> "ds`"]
@@ -408,6 +411,25 @@ parseYAMLValue[s_] := With[{
 ];
 
 (* ================ YAMLToAssociation End ================ *)
+
+(* ================ CodeSnippets Start ================ *)
+
+CodeSnippets[data : _List | _Association, rest___] := CodeSnippets[#, rest]& /@ data;
+CodeSnippets[str_String, spec : _ : Automatic] := With[{
+	codeSpec = Replace[spec, Automatic -> LetterCharacter...]
+},
+	StringTrim @ StringCases[
+		"\n" <> str <> "\n",
+		"\n```" ~~ codeSpec ~~ "\n" ~~ Shortest[__] ~~ "\n```\n"
+	]
+];
+CodeSnippets[__] := Missing["NotAString"];
+
+
+(* ================ CodeSnippets End ================ *)
+
+
+
 
 End[]
 
