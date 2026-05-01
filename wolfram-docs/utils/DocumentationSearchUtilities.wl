@@ -237,11 +237,9 @@ DataSizeSummary[expr_] := StringTemplate["Expression: `1` arguments (Head: `2`)"
 
 
 
-
-
 (* ================ OnlineDocsQuery Start ================ *)
 
-(* Additional OnlineDocsQuery implementations *)
+OnlineDocsQuery::NotAnElement = "Requested element(s) `1` do not exist. The closest matching existing element(s) are `2`";
 
 OnlineDocsQuery[url_] := OnlineDocsQuery[url, "Elements"];
 
@@ -257,22 +255,11 @@ OnlineDocsQuery[url_, element_, "SizeSummary"] := Replace[
 	}
 ];
 
-OnlineDocsQuery[url_, el_String, "Elements"] := Replace[
-	OnlineDocsQuery[url, el, All],
-	{
-		a_Association :> Keys[a],
-		l : {___Association} :> DeleteDuplicates @ Flatten[Keys /@ l],
-		_ :> Missing["NotApplicable"]
-	}
-];
+OnlineDocsQuery[url_, el_String, "Elements"] := availableKeys @ OnlineDocsQuery[url, el, All];
 
-OnlineDocsQuery[url_, el_String, part : _Key | {__Key}] := Replace[
+OnlineDocsQuery[url_, el_String, part : _Key | {__Key}] := extractAndSuggestKey[
 	OnlineDocsQuery[url, el, All],
-	{
-		a_Association :> a[[part]],
-		l : {___Association} :> l[[All, part]],
-		_ :> Missing["NotApplicable"]
-	}
+	part
 ];
 
 OnlineDocsQuery[url_, "FullText", ___] := Replace[
@@ -336,6 +323,38 @@ extractSections[s_] := Enclose @ Module[{
 		AssociationThread[headers, sections]
 		,
 		<||>
+	]
+];
+
+availableKeys[data_] := Replace[
+	data,
+	{
+		a_Association :> Keys[a],
+		l : {___Association} :> DeleteDuplicates @ Flatten[Keys /@ l],
+		_ :> Missing["NotApplicable"]
+	}
+];
+
+extractAndSuggestKey[dat_, part : _Key | {__Key}] := Module[{
+	data = dat,
+	existingKeys = availableKeys[dat],
+	requested = Replace[Flatten[{part}], Key[k_] :> k, {1}],
+	missing, suggested
+},
+	If[ MissingQ[existingKeys] || existingKeys === {},
+		Missing["NotApplicable"],
+		missing = Complement[requested, existingKeys];
+		If[ missing =!= {},
+			suggested = Nearest[existingKeys, missing, 1][[All, 1]];
+			Message[OnlineDocsQuery::NotAnElement, missing, suggested]
+		];
+		Replace[data,
+			{
+				a_Association :> Part[a, part],
+				l : {___Association} :> Part[l, All, part],
+				_ :> Missing["NotApplicable"]
+			}
+		]
 	]
 ]
 
