@@ -28,16 +28,16 @@ and Limit (default: 5) are used for pagination of results. \n\n" <> StringTempla
 
 
 FetchAndCacheOnlineDocPage::usage = "FetchAndCacheOnlineDocPage[url] fetches the markdown version of a documentation page at a given URL. \
-It if successful, it will locally cache the page and return the file name of the cache.
+If successful, it will locally cache the page and return the file name of the cache.
 FetchAndCacheOnlineDocPage[url, forceQ] allows the user to specify if the re-caching should be forced. The default for forceQ is False."
 
-OnlineDocsQuery::usage = "OnlineDocsQuery[url, elements] extracts specific elements from the online documentation at the requested URL. The default value for elements is \"Elements\".
+OnlineDocsQuery::usage = "OnlineDocsQuery[url, elements] extracts specific elements from the online documentation at the requested URL. The default value for elements is \"Elements\". The argument url can also be used to point to a local cache of the page.
 OnlineDocsQuery[url, elements, spec] further specifies what to extract from a given element. The default is All.
 
 Possible elements are:
-Elements: A list of the possible elements that can be extracted. This is page-dependent.
+Elements: A list of the possible elements that can be extracted.
 YAML: A string with the YAML that can be found at the top of the file.
-StructuredYAML: A Wolfram representation of the YAML front matter (i.e., an associations).
+StructuredYAML: A Wolfram representation of the YAML front matter (i.e., associations and lists).
 FullText: The entire markdown text.
 Sections: An association with all the markdown section headers found in the file and the corresponding text.
 {el_1, el_2, ...}: Extract multiple elements. Returns an association with the requested elements.
@@ -45,7 +45,7 @@ Sections: An association with all the markdown section headers found in the file
 Possible values for the 3rd argument spec are:
 SizeSummary: The amount of data in a given element. Returns a string with the relevant information such as number of elements, dimensions or keys.
 Elements: The keys found in an extracted element. Only works for elements that return an association or a list of associations.
-Key[key]: Extracts a specify key or column from the element. Only applicable to key-value type elements.
+Key[key]: Extracts a specific key or column from the element. Only applicable to key-value type elements.
 {Key[key_1], Key[key_2], ...}: Extracts multiple keys."
 
 DataSizeSummary::usage = "DataSizeSummary[expr] returns a formatted string summarizing the size and structure of the given expression.
@@ -237,16 +237,15 @@ DataSizeSummary[expr_] := StringTemplate["Expression: `1` arguments (Head: `2`)"
 
 
 
-
-
 (* ================ OnlineDocsQuery Start ================ *)
 
-(* Additional OnlineDocsQuery implementations *)
-OnlineDocsQuery[url_, "Elements"] := {
-	"YAML", "StructuredYAML", "FullText", "Sections"
-};
+OnlineDocsQuery::NotAnElement = "Requested element(s) `1` do not exist. The closest matching existing element(s) are `2`";
 
 OnlineDocsQuery[url_] := OnlineDocsQuery[url, "Elements"];
+
+OnlineDocsQuery[url_, "Elements"] := {
+	"Elements", "YAML", "StructuredYAML", "FullText", "Sections"
+};
 
 OnlineDocsQuery[url_, element_, "SizeSummary"] := Replace[
 	OnlineDocsQuery[url, element, All],
@@ -256,26 +255,18 @@ OnlineDocsQuery[url_, element_, "SizeSummary"] := Replace[
 	}
 ];
 
-OnlineDocsQuery[url_, el_String, "Elements"] := Replace[
-	OnlineDocsQuery[url, el, All],
-	{
-		a_Association :> Keys[a],
-		l : {___Association} :> DeleteDuplicates @ Flatten[Keys /@ l],
-		_ :> Missing["NotApplicable"]
-	}
-];
+OnlineDocsQuery[url_, el_String, "Elements"] := availableKeys @ OnlineDocsQuery[url, el, All];
 
-OnlineDocsQuery[url_, el_String, part : _Key | {__Key}] := Replace[
+OnlineDocsQuery[url_, el_String, part : _Key | {__Key}] := extractAndSuggestKey[
 	OnlineDocsQuery[url, el, All],
-	{
-		a_Association :> a[[part]],
-		l : {___Association} :> l[[All, part]],
-		_ :> Missing["NotApplicable"]
-	}
+	part
 ];
 
 OnlineDocsQuery[url_, "FullText", ___] := Replace[
-	FetchAndCacheOnlineDocPage[url],
+	If[ FileExistsQ[url],
+		url,
+		FetchAndCacheOnlineDocPage[url]
+	],
 	s_String :> Import[s, "String"]
 ];
 
@@ -332,6 +323,38 @@ extractSections[s_] := Enclose @ Module[{
 		AssociationThread[headers, sections]
 		,
 		<||>
+	]
+];
+
+availableKeys[data_] := Replace[
+	data,
+	{
+		a_Association :> Keys[a],
+		l : {___Association} :> DeleteDuplicates @ Flatten[Keys /@ l],
+		_ :> Missing["NotApplicable"]
+	}
+];
+
+extractAndSuggestKey[dat_, part : _Key | {__Key}] := Module[{
+	data = dat,
+	existingKeys = availableKeys[dat],
+	requested = Replace[Flatten[{part}], Key[k_] :> k, {1}],
+	missing, suggested
+},
+	If[ MissingQ[existingKeys] || existingKeys === {},
+		Missing["NotApplicable"],
+		missing = Complement[requested, existingKeys];
+		If[ missing =!= {},
+			suggested = Nearest[existingKeys, missing, 1][[All, 1]];
+			Message[OnlineDocsQuery::NotAnElement, missing, suggested]
+		];
+		Replace[data,
+			{
+				a_Association :> Part[a, part],
+				l : {___Association} :> Part[l, All, part],
+				_ :> Missing["NotApplicable"]
+			}
+		]
 	]
 ]
 

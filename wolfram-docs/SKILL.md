@@ -25,6 +25,15 @@ SetDirectory["path/to/wolfram-docs"];
 Get["utils/DocumentationSearchUtilities.wl"]
 ```
 
+Read the up-to-date usage information for the core functions:
+
+```wolfram
+(* Read usage information for core functions *)
+DocuSearch::usage
+OnlineDocsQuery::usage
+DataSizeSummary::usage
+```
+
 All functions provide detailed usage information on-demand via `?FunctionName` or `FunctionName::usage`. The usage messages contain comprehensive parameter descriptions, return value structures, and example patterns.
 
 ## Core Functions
@@ -52,28 +61,7 @@ customResults = DocuSearch["integration",
   "MetaData" -> {"Title", "URI", "Usage", "SeeAlso"}];
 ```
 
-### 2. Cache Online Documentation (`FetchAndCacheOnlineDocPage`)
-
-Download and locally cache online documentation pages for offline analysis.
-
-**Key capabilities:**
-- Automatic caching to local directory structure
-- Markdown format preservation
-- Force refresh options
-- URL validation and conversion
-
-**Caching workflow:**
-```wolfram
-(* Cache a specific page *)
-cacheFile = FetchAndCacheOnlineDocPage[
-  "https://reference.wolfram.com/language/ref/Plot.html"
-];
-
-(* Force refresh existing cache *)
-FetchAndCacheOnlineDocPage[url, True];
-```
-
-### 3. Extract Documentation Elements (`OnlineDocsQuery`)
+### 2. Extract Documentation Elements (`OnlineDocsQuery`)
 
 Parse specific elements from cached or online documentation pages.
 
@@ -99,7 +87,7 @@ OnlineDocsQuery[url, "FullText", "SizeSummary"]
 OnlineDocsQuery[url, "StructuredYAML", Key["title"]]
 ```
 
-### 4. Data Structure Analysis (`DataSizeSummary`)
+### 3. Data Structure Analysis (`DataSizeSummary`)
 
 Generate formatted summaries of data structures for analysis and reporting.
 
@@ -108,6 +96,25 @@ Generate formatted summaries of data structures for analysis and reporting.
 - Dataset analysis (rows, columns, keys)
 - Array dimensions and element counts
 - Association structure descriptions
+
+### 4. Cache and refresh Online Documentation (`FetchAndCacheOnlineDocPage`)
+
+Download and locally cache online documentation pages for offline analysis. Normally `OnlineDocsQuery` does this automatically when querying online URLs, but this function allows explicit control over caching and refreshing.
+
+**Key capabilities:**
+- Automatic caching to local directory structure
+- Markdown format preservation
+- Force refresh options
+- URL validation and conversion
+
+**Caching workflow:**
+```wolfram
+(* Cache a specific page *)
+cacheFile = FetchAndCacheOnlineDocPage["https://reference.wolfram.com/language/ref/Plot.html"];
+
+(* Force refresh existing cache *)
+FetchAndCacheOnlineDocPage[url, True];
+```
 
 ## Workflow Examples
 
