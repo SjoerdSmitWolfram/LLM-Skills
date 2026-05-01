@@ -8,7 +8,25 @@ This repository contains thoroughly tested agent skills that enhance LLM capabil
 
 ## Skills in this Repository
 
-### 🔧 wolfram-plumbing
+### � wolfram-docs
+**Domain**: Wolfram Language Documentation  
+**Purpose**: Search and retrieve Wolfram Language documentation programmatically for analysis and reference
+
+**Key Capabilities**:
+- Search documentation database with full-text queries
+- Extract structured content from documentation pages
+- Cache documentation locally for offline analysis
+- Parse YAML metadata and sections from online docs
+- Generate data structure summaries and extract code snippets
+
+**When to Use**:
+- Finding Wolfram functions by description or use case
+- Extracting usage examples and function documentation
+- Building local documentation databases
+- Analyzing documentation structure and completeness
+- Mining content for educational or reference purposes
+
+### �🔧 wolfram-plumbing
 **Domain**: Wolfram Language Development  
 **Purpose**: Examine internal implementations of Wolfram Language built-in functions when documentation is insufficient
 
@@ -29,13 +47,18 @@ This repository contains thoroughly tested agent skills that enhance LLM capabil
 
 ```
 LLM-Skills/
-├── README.md                    # This file
-├── LICENSE                      # MIT License
-└── wolfram-plumbing/           # Wolfram Language function inspection skill
-    ├── SKILL.md                # Main skill instructions and workflows
-    ├── example-parallelize.md  # Detailed example using Parallelize function
-    └── utils/                  # Supporting utilities
-        └── DefinitionString.wl # Wolfram Language utility for function inspection
+├── README.md                      # This file
+├── LICENSE                        # MIT License
+├── wolfram-docs/                  # Wolfram Language documentation search skill
+│   ├── SKILL.md                  # Main skill instructions and workflows
+│   ├── cache/                    # Local documentation cache
+│   │   └── ref/                  # Cached reference pages
+│   └── utils/                    # Supporting utilities
+│       └── DocumentationSearchUtilities.wl # Documentation search utilities
+└── wolfram-plumbing/             # Wolfram Language function inspection skill
+    ├── SKILL.md                  # Main skill instructions and workflows
+    └── utils/                    # Supporting utilities
+        └── DefinitionString.wl   # Wolfram Language utility for function inspection
 ```
 
 ## Using These Skills
@@ -51,6 +74,11 @@ LLM-Skills/
 Follow the procedures in each `SKILL.md` file. All skills are self-contained with necessary utilities and examples included.
 
 ### Prerequisites
+
+**For wolfram-docs skill**:
+- Access to Wolfram Language evaluation (Mathematica, Wolfram Engine, or Wolfram MCP Server)
+- Internet connectivity for online documentation access
+- Ability to execute Wolfram Language code in your environment
 
 **For wolfram-plumbing skill**:
 - Access to Wolfram Language evaluation (Mathematica, Wolfram Engine, or Wolfram MCP Server)
