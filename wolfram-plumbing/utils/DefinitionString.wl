@@ -11,21 +11,18 @@ Begin["`Private`"]
 
 (* Main function for extracting and formatting symbol definitions *)
 SetAttributes[DefinitionString, HoldFirst];
-DefinitionString[sym_Symbol]
 DefinitionString[sym_Symbol] := Block[
 	{
+		contextPath, symContext,
 		$ContextPath, $Context, $ContextAliases, contexts, str, aliases,
 		defs
 	},
 	Internal`InheritedBlock[{sym},
 		sym;
+		symContext = Context[sym];
 		Needs["CodeFormatter`" -> None];
 		ClearAttributes[sym, ReadProtected];
-		$ContextPath = DeleteDuplicates @ {"System`", Context[sym]};
-		$Context = Context[sym];
-		$ContextAliases = <||>;
-		str = CodeFormatter`CodeFormat @ ToString[Definition[sym], InputForm];
-		defs = GeneralUtilities`Definitions[sym];
+		contextPath = DeleteDuplicates @ {"System`"};
 		contexts = ReverseSortBy[StringLength] @ DeleteCases[
 			DeleteDuplicates @ Cases[
 				GeneralUtilities`Definitions[sym],
@@ -33,13 +30,31 @@ DefinitionString[sym_Symbol] := Block[
 				{0, Infinity},
 				Heads -> True
 			],
-			Alternatives @@ $ContextPath
+			Alternatives @@ contextPath
 		];
-		aliases = MapIndexed[#1 -> "c" <> ToString[First[#2]] <> "`"&, contexts];
+		$Context = SelectFirst[
+			contexts,
+			StringContainsQ["`private`" | "dump`", IgnoreCase -> True],
+			symContext
+		];
+		$ContextAliases = <||>;
+		$ContextPath = contextPath;
+		str = ToString[Definition[sym], InputForm];
+		defs = GeneralUtilities`Definitions[sym];
+		
+		aliases = MapIndexed[
+			#1 -> "c" <> ToString[First[#2]] <> "`"&,
+			DeleteDuplicates @ DeleteCases[
+				Prepend[symContext] @ SortBy[contexts, StringLength],
+				Alternatives @@ Append[$ContextPath, $Context]
+			]
+		];
+		str //= StringReplace[aliases] /* StringTrim /* CodeFormatter`CodeFormat;
 		StringJoin[
-			"Context: ", $Context,
-			"\n\nAliases:\n", StringRiffle[aliases, "\n"],
-			"\n\nDefinition:\n", StringTrim @ StringReplace[str, aliases],
+			"ContextPath: ", StringRiffle[contextPath, ", "],
+			"\nContext: ", $Context,
+			"\n\nAliases:\n", If[aliases === {}, "None", StringRiffle[aliases, "\n"]],
+			"\n\nDefinition:\n", str,
 			If[ FreeQ[defs, GeneralUtilities`PackageScope`$KernelFunctionPlaceholder],
 				"",
 				"\n\n<<Hidden kernel definitions>>"
