@@ -39,8 +39,8 @@ The expected output is `Null`.
 
 **What DefinitionString provides:**
 - Removes ReadProtected attributes to access internal definitions
-- Lists the context of the function and its sub-functions
-- Aliases long context names for readability (e.g., StatisticalModeling`LinearFit`Private` → c1`)
+- Lists the $Context and $ContextPath used to print the definition. Symbols in these contexts are printed using just their short names (e.g., `LinearModelFit`), while symbols in other contexts are printed with their full context in aliased form
+- Aliases used for long context names for readability (e.g., StatisticalModeling`LinearFit`Private` → c1`)
 - Shows the complete definition structure including attributes and rules
 - Compiled/kernel code shows placeholder `<<Hidden kernel definitions>>`
 
